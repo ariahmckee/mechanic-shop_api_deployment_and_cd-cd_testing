@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+venv/
+instance/
+.env
+.env.*
+!.env.example
+.vscode/
+.DS_Store
+app/.DS_Store
+
+scratch.txt
+ProjectGuidelines.txt
+Mechanic Shop ERD.json
+Mechanic Shop ERD.csv
+config_password.py
+Postman Testing Order.txt

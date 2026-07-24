@@ -1,0 +1,985 @@
+swagger: "2.0"
+
+info:
+  title: "Mechanic Shop API"
+  description: "API for managing a mechanic shop's customers, mechanics, service tickets, and inventory."
+  version: "1.0.0"
+
+host: "127.0.0.1:5000"
+basePath: "/"
+schemes:
+  - "http"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+tags:
+  - name: "Customers"
+    description: "Customer registration, authentication, and account management."
+  - name: "Mechanics"
+    description: "Mechanic authentication, profiles, experience ranking, and search."
+  - name: "Tickets"
+    description: "Service-ticket management, mechanic assignments, and parts usage."
+  - name: "Inventory"
+    description: "Inventory-part management."
+
+securityDefinitions:
+  bearerAuth:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+    description: "Enter the word Bearer, a space, and then the token: Bearer <token>"
+
+paths:
+  /customers/login:
+    post:
+      tags:
+        - "Customers"
+      operationId: "loginCustomer"
+      summary: "Log in a customer"
+      description: "Validates customer credentials and returns a customer-specific token."
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Customer login credentials."
+          required: true
+          schema:
+            $ref: "#/definitions/LoginCredentials"
+      responses:
+        200:
+          description: "Login successful."
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /customers/:
+    post:
+      tags:
+        - "Customers"
+      operationId: "createCustomer"
+      summary: "Create a customer"
+      description: "Creates a customer. Email addresses must be unique."
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Information required to create a customer."
+          required: true
+          schema:
+            $ref: "#/definitions/CustomerPayload"
+      responses:
+        201:
+          description: "Customer created successfully."
+          schema:
+            $ref: "#/definitions/CustomerResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+    get:
+      tags:
+        - "Customers"
+      operationId: "getCustomers"
+      summary: "Get customers"
+      description: "Returns a paginated list of customers."
+      parameters:
+        - in: "query"
+          name: "page"
+          description: "Page number to retrieve."
+          required: false
+          type: "integer"
+          default: 1
+          minimum: 1
+        - in: "query"
+          name: "per_page"
+          description: "Number of customers to return per page."
+          required: false
+          type: "integer"
+          default: 10
+          minimum: 1
+      responses:
+        200:
+          description: "Customers retrieved successfully."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/CustomerResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+    put:
+      tags:
+        - "Customers"
+      operationId: "updateCustomer"
+      summary: "Update the logged-in customer"
+      description: "Updates the customer identified by the customer token."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Complete replacement values for the customer account."
+          required: true
+          schema:
+            $ref: "#/definitions/CustomerPayload"
+      responses:
+        200:
+          description: "Customer updated successfully."
+          schema:
+            $ref: "#/definitions/CustomerResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+    delete:
+      tags:
+        - "Customers"
+      operationId: "deleteCustomer"
+      summary: "Delete the logged-in customer"
+      description: "Deletes the customer identified by the customer token."
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: "Customer deleted successfully."
+          schema:
+            $ref: "#/definitions/MessageResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /customers/{customer_id}:
+    get:
+      tags:
+        - "Customers"
+      operationId: "getCustomer"
+      summary: "Get one customer"
+      description: "Returns a customer by ID."
+      parameters:
+        - in: "path"
+          name: "customer_id"
+          description: "Unique ID of the customer to retrieve."
+          required: true
+          type: "integer"
+          minimum: 1
+      responses:
+        200:
+          description: "Customer retrieved successfully."
+          schema:
+            $ref: "#/definitions/CustomerResponse"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /mechanics/login:
+    post:
+      tags:
+        - "Mechanics"
+      operationId: "loginMechanic"
+      summary: "Log in a mechanic"
+      description: "Validates mechanic credentials and returns a mechanic-specific token."
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Mechanic login credentials."
+          required: true
+          schema:
+            $ref: "#/definitions/LoginCredentials"
+      responses:
+        200:
+          description: "Login successful."
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /mechanics/:
+    post:
+      tags:
+        - "Mechanics"
+      operationId: "createMechanic"
+      summary: "Create a mechanic"
+      description: "Creates a mechanic. Email addresses and phone numbers must be unique."
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Information required to create a mechanic."
+          required: true
+          schema:
+            $ref: "#/definitions/MechanicPayload"
+      responses:
+        201:
+          description: "Mechanic created successfully."
+          schema:
+            $ref: "#/definitions/MechanicResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+    get:
+      tags:
+        - "Mechanics"
+      operationId: "getMechanics"
+      summary: "Get mechanics"
+      description: "Returns all mechanics, or a paginated result when both page and per_page are supplied."
+      parameters:
+        - in: "query"
+          name: "page"
+          description: "Page number to retrieve; use together with per_page."
+          required: false
+          type: "integer"
+          minimum: 1
+        - in: "query"
+          name: "per_page"
+          description: "Number of mechanics per page; use together with page."
+          required: false
+          type: "integer"
+          minimum: 1
+      responses:
+        200:
+          description: "Mechanics retrieved successfully."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/MechanicResponse"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /mechanics/experience:
+    get:
+      tags:
+        - "Mechanics"
+      operationId: "getMechanicsByExperience"
+      summary: "Get mechanics ordered by experience"
+      description: "Returns mechanics ordered from most tickets worked to fewest."
+      responses:
+        200:
+          description: "Mechanics retrieved successfully."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/MechanicResponse"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /mechanics/search:
+    get:
+      tags:
+        - "Mechanics"
+      operationId: "searchMechanics"
+      summary: "Search mechanics by name"
+      description: "Returns mechanics whose names contain the supplied text."
+      parameters:
+        - in: "query"
+          name: "name"
+          description: "Full or partial mechanic name to search for."
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Mechanics retrieved successfully."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/MechanicResponse"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /mechanics/{mechanic_id}:
+    parameters:
+      - in: "path"
+        name: "mechanic_id"
+        description: "Unique ID of the mechanic."
+        required: true
+        type: "integer"
+        minimum: 1
+
+    get:
+      tags:
+        - "Mechanics"
+      operationId: "getMechanic"
+      summary: "Get one mechanic"
+      description: "Returns a mechanic by ID."
+      responses:
+        200:
+          description: "Mechanic retrieved successfully."
+          schema:
+            $ref: "#/definitions/MechanicResponse"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+    put:
+      tags:
+        - "Mechanics"
+      operationId: "updateMechanic"
+      summary: "Update a mechanic"
+      description: "Updates a mechanic profile. A mechanic may update only their own profile."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Complete replacement values for the mechanic profile."
+          required: true
+          schema:
+            $ref: "#/definitions/MechanicPayload"
+      responses:
+        200:
+          description: "Mechanic updated successfully."
+          schema:
+            $ref: "#/definitions/MechanicResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        403:
+          $ref: "#/responses/Forbidden"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+    delete:
+      tags:
+        - "Mechanics"
+      operationId: "deleteMechanic"
+      summary: "Delete a mechanic"
+      description: "Deletes a mechanic profile. A mechanic may delete only their own profile."
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: "Mechanic deleted successfully."
+          schema:
+            $ref: "#/definitions/MessageResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        403:
+          $ref: "#/responses/Forbidden"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /tickets/:
+    post:
+      tags:
+        - "Tickets"
+      operationId: "createTicket"
+      summary: "Create a ticket"
+      description: "Creates a service ticket for an existing customer."
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Information required to create a ticket."
+          required: true
+          schema:
+            $ref: "#/definitions/TicketPayload"
+      responses:
+        201:
+          description: "Ticket created successfully."
+          schema:
+            $ref: "#/definitions/TicketResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /tickets/my-tickets:
+    get:
+      tags:
+        - "Tickets"
+      operationId: "getCustomerTickets"
+      summary: "Get the logged-in customer's tickets"
+      description: "Returns every ticket belonging to the customer identified by the customer token."
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: "Tickets retrieved successfully."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/TicketResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /tickets/{ticket_id}:
+    parameters:
+      - in: "path"
+        name: "ticket_id"
+        description: "Unique ID of the ticket."
+        required: true
+        type: "integer"
+        minimum: 1
+
+    get:
+      tags:
+        - "Tickets"
+      operationId: "getTicket"
+      summary: "Get one ticket"
+      description: "Returns a ticket by ID."
+      responses:
+        200:
+          description: "Ticket retrieved successfully."
+          schema:
+            $ref: "#/definitions/TicketResponse"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+    put:
+      tags:
+        - "Tickets"
+      operationId: "updateTicket"
+      summary: "Update a ticket"
+      description: "Updates a ticket and verifies that its customer exists."
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Complete replacement values for the ticket."
+          required: true
+          schema:
+            $ref: "#/definitions/TicketPayload"
+      responses:
+        200:
+          description: "Ticket updated successfully."
+          schema:
+            $ref: "#/definitions/TicketResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+    delete:
+      tags:
+        - "Tickets"
+      operationId: "deleteTicket"
+      summary: "Delete a ticket"
+      description: "Deletes a ticket. A valid mechanic token is required."
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: "Ticket deleted successfully."
+          schema:
+            $ref: "#/definitions/MessageResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /tickets/{ticket_id}/edit:
+    parameters:
+      - in: "path"
+        name: "ticket_id"
+        description: "Unique ID of the ticket whose mechanics will be edited."
+        required: true
+        type: "integer"
+        minimum: 1
+
+    put:
+      tags:
+        - "Tickets"
+      operationId: "editTicketMechanics"
+      summary: "Add or remove mechanics from a ticket"
+      description: "Adds mechanics listed in add_ids and removes mechanics listed in remove_ids. Use an empty array when no mechanics need to be added or removed."
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Mechanic IDs to add to or remove from the ticket."
+          required: true
+          schema:
+            $ref: "#/definitions/EditTicketMechanicsPayload"
+      responses:
+        200:
+          description: "Ticket mechanics updated successfully."
+          schema:
+            $ref: "#/definitions/TicketResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /tickets/{ticket_id}/add-part/{inventory_id}:
+    parameters:
+      - in: "path"
+        name: "ticket_id"
+        description: "Unique ID of the ticket receiving the inventory part."
+        required: true
+        type: "integer"
+        minimum: 1
+      - in: "path"
+        name: "inventory_id"
+        description: "Unique ID of the inventory part to add."
+        required: true
+        type: "integer"
+        minimum: 1
+
+    put:
+      tags:
+        - "Tickets"
+      operationId: "addPartToTicket"
+      summary: "Add an inventory part to a ticket"
+      description: "Adds the requested quantity of a part. If the part is already on the ticket, its quantity is increased."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Quantity to add. If omitted, quantity defaults to 1."
+          required: false
+          schema:
+            $ref: "#/definitions/AddPartToTicketPayload"
+      responses:
+        200:
+          description: "Inventory part added to the ticket successfully."
+          schema:
+            $ref: "#/definitions/TicketResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /inventory/:
+    post:
+      tags:
+        - "Inventory"
+      operationId: "createInventoryPart"
+      summary: "Create an inventory part"
+      description: "Creates an inventory part. A valid mechanic token is required."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Information required to create an inventory part."
+          required: true
+          schema:
+            $ref: "#/definitions/InventoryPayload"
+      responses:
+        201:
+          description: "Inventory part created successfully."
+          schema:
+            $ref: "#/definitions/InventoryResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+    get:
+      tags:
+        - "Inventory"
+      operationId: "getInventory"
+      summary: "Get all inventory parts"
+      description: "Returns all parts in inventory."
+      responses:
+        200:
+          description: "Inventory retrieved successfully."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/InventoryResponse"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+  /inventory/{inventory_id}:
+    parameters:
+      - in: "path"
+        name: "inventory_id"
+        description: "Unique ID of the inventory part."
+        required: true
+        type: "integer"
+        minimum: 1
+
+    get:
+      tags:
+        - "Inventory"
+      operationId: "getInventoryPart"
+      summary: "Get one inventory part"
+      description: "Returns an inventory part by ID."
+      responses:
+        200:
+          description: "Inventory part retrieved successfully."
+          schema:
+            $ref: "#/definitions/InventoryResponse"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+    put:
+      tags:
+        - "Inventory"
+      operationId: "updateInventoryPart"
+      summary: "Update an inventory part"
+      description: "Updates an inventory part. A valid mechanic token is required."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Complete replacement values for the inventory part."
+          required: true
+          schema:
+            $ref: "#/definitions/InventoryPayload"
+      responses:
+        200:
+          description: "Inventory part updated successfully."
+          schema:
+            $ref: "#/definitions/InventoryResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+    delete:
+      tags:
+        - "Inventory"
+      operationId: "deleteInventoryPart"
+      summary: "Delete an inventory part"
+      description: "Deletes an inventory part. A valid mechanic token is required."
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: "Inventory part deleted successfully."
+          schema:
+            $ref: "#/definitions/MessageResponse"
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        404:
+          $ref: "#/responses/NotFound"
+        429:
+          $ref: "#/responses/TooManyRequests"
+
+responses:
+  BadRequest:
+    description: "The request is invalid or authentication is required."
+    schema:
+      $ref: "#/definitions/ErrorResponse"
+  Unauthorized:
+    description: "The credentials or token are invalid or expired."
+    schema:
+      $ref: "#/definitions/ErrorResponse"
+  Forbidden:
+    description: "The authenticated user is not allowed to perform this operation."
+    schema:
+      $ref: "#/definitions/ErrorResponse"
+  NotFound:
+    description: "The requested resource was not found."
+    schema:
+      $ref: "#/definitions/ErrorResponse"
+  TooManyRequests:
+    description: "The request exceeded an applicable rate limit."
+    schema:
+      $ref: "#/definitions/ErrorResponse"
+
+definitions:
+  LoginCredentials:
+    type: "object"
+    required:
+      - "email"
+      - "password"
+    properties:
+      email:
+        type: "string"
+        format: "email"
+        example: "user@example.com"
+      password:
+        type: "string"
+        example: "password123"
+
+  LoginResponse:
+    type: "object"
+    properties:
+      auth_token:
+        type: "string"
+      message:
+        type: "string"
+        example: "Successfully Logged In"
+      status:
+        type: "string"
+        example: "success"
+
+  CustomerPayload:
+    type: "object"
+    required:
+      - "name"
+      - "email"
+      - "phone"
+      - "password"
+    properties:
+      name:
+        type: "string"
+        example: "John Doe"
+      email:
+        type: "string"
+        format: "email"
+        example: "john@example.com"
+      phone:
+        type: "string"
+        example: "2222222222"
+      password:
+        type: "string"
+        example: "password123"
+
+  CustomerResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        example: 1
+      name:
+        type: "string"
+        example: "John Doe"
+      email:
+        type: "string"
+        format: "email"
+        example: "john@example.com"
+      phone:
+        type: "string"
+        example: "2222222222"
+
+  MechanicPayload:
+    type: "object"
+    required:
+      - "name"
+      - "email"
+      - "phone"
+      - "salary"
+      - "password"
+    properties:
+      name:
+        type: "string"
+        example: "Jane Mechanic"
+      email:
+        type: "string"
+        format: "email"
+        example: "jane@example.com"
+      phone:
+        type: "string"
+        example: "2222222222"
+      salary:
+        type: "number"
+        format: "float"
+        example: 75000.0
+      password:
+        type: "string"
+        example: "password123"
+
+  MechanicResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        example: 1
+      name:
+        type: "string"
+        example: "Jane Mechanic"
+      email:
+        type: "string"
+        format: "email"
+        example: "jane@example.com"
+      phone:
+        type: "string"
+        example: "2222222222"
+      salary:
+        type: "number"
+        format: "float"
+        example: 75000.0
+
+  TicketPayload:
+    type: "object"
+    required:
+      - "vin"
+      - "ticket_date"
+      - "ticket_desc"
+      - "customer_id"
+    properties:
+      vin:
+        type: "string"
+        example: "ABCDEFGHIJKL1234567890"
+      ticket_date:
+        type: "string"
+        format: "date"
+        example: "2026-07-21"
+      ticket_desc:
+        type: "string"
+        example: "Replace brake pads"
+      customer_id:
+        type: "integer"
+        minimum: 1
+        example: 1
+
+  TicketResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        example: 1
+      vin:
+        type: "string"
+        example: "ABCDEFGHIJKL1234567890"
+      ticket_date:
+        type: "string"
+        format: "date"
+        example: "2026-07-21"
+      ticket_desc:
+        type: "string"
+        example: "Replace brake pads"
+      customer_id:
+        type: "integer"
+        example: 1
+      mechanic_ids:
+        type: "array"
+        items:
+          type: "integer"
+        example: [1, 2]
+      inventory_items:
+        type: "array"
+        items:
+          $ref: "#/definitions/TicketInventoryItem"
+
+  TicketInventoryItem:
+    type: "object"
+    properties:
+      inventory_id:
+        type: "integer"
+        example: 1
+      name:
+        type: "string"
+        example: "Brake Pad Set"
+      price:
+        type: "number"
+        format: "float"
+        example: 59.99
+      quantity:
+        type: "integer"
+        minimum: 1
+        example: 2
+
+  EditTicketMechanicsPayload:
+    type: "object"
+    required:
+      - "add_ids"
+      - "remove_ids"
+    properties:
+      add_ids:
+        type: "array"
+        description: "Mechanic IDs to add to the ticket."
+        items:
+          type: "integer"
+        example: [2, 3]
+      remove_ids:
+        type: "array"
+        description: "Mechanic IDs to remove from the ticket."
+        items:
+          type: "integer"
+        example: [1]
+
+  AddPartToTicketPayload:
+    type: "object"
+    properties:
+      quantity:
+        type: "integer"
+        minimum: 1
+        default: 1
+        example: 2
+
+  InventoryPayload:
+    type: "object"
+    required:
+      - "name"
+      - "price"
+    properties:
+      name:
+        type: "string"
+        example: "Brake Pad Set"
+      price:
+        type: "number"
+        format: "float"
+        example: 59.99
+
+  InventoryResponse:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        example: 1
+      name:
+        type: "string"
+        example: "Brake Pad Set"
+      price:
+        type: "number"
+        format: "float"
+        example: 59.99
+
+  MessageResponse:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+
+  ErrorResponse:
+    type: "object"
+    description: "Error responses may use error or message depending on the handler. Validation errors may include field-specific properties."
+    additionalProperties: true
+    properties:
+      error:
+        type: "string"
+      message:
+        type: "string"

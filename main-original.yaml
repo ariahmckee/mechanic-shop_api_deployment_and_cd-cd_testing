@@ -1,0 +1,80 @@
+# Archived copy of the original workflow. This file is intentionally stored
+# outside .github/workflows so GitHub Actions will not try to execute it.
+
+# name: This is the name of your workflow. In this case, it's "Flask CI". This is an arbitrary name and can be anything you like.
+name: Flask CI
+
+# on: This specifies the events that will trigger the workflow. In this case, the workflow will run on every push event to the main or master branches.
+on:
+    push:
+        branches: [main, master]
+
+# jobs: This defines the jobs that make up the workflow. In this case, there is only one job named "build".build: The name of the job. This is an arbitrary name and can be anything you like.
+jobs:
+    build:
+        # runs-on: This specifies the type of machine that will run the job. In this case, the job will run on a machine with Ubuntu as the operating system.
+        runs-on: ubuntu-latest
+
+        # steps: This is a list of steps that make up the job. Each step is a single unit of work that is performed in sequence.name: The name of the step. This is an arbitrary name and can be anything you like.
+        steps:
+            - name: Checkout code
+              # uses: This specifies an action to use in the step. In this case, the actions/checkout@v2 action is used to check out the code from the repository.
+              uses: actions/checkout@v2
+
+            - name: Set up Python
+              # uses: This specifies an action to use in the step. In this case, the actions/setup-python@v2 action is used to set up Python.
+              uses: actions/setup-python@v2
+              # with: This specifies input parameters for the action. In this case, it specifies the version of Python to use (3.12).
+              with:
+                python-version: 3.21
+
+            - name: Create virtual environment
+              # run: This specifies a shell command to run as part of the step. In this case, it creates a virtual environment for the project and activates it.
+              run: |
+                python -m venv venv
+                source venv/bin/activate
+
+            - name: Install dependencies
+              # run: This specifies a shell command to run as part of the step. In this case, it installs dependencies using pip
+              run: |
+                python -m pip install --upgrade pip
+                python -m pip install -r requirements.txt
+
+            - name: Print debugging information
+              # run: This specifies a shell command to run as part of the step. In this case, it prints debugging information to the console.
+              run: |
+                echo "Python Version: $(python --version)"
+                echo "Working Directory: $(pwd)"
+                echo "Contents of Working Directory: $(ls -l)"
+                echo "Contents of site-packages: $(ls -l venv/lib/python*/site-packages)"
+
+# Summary: The overall workflow is triggered on pushes to the main or master branches. It runs a single job named "build" on an Ubuntu machine. The job consists of several steps, including checking out the code, setting up Python, creating a virtual environment, installing dependencies, and printing debugging information.
+
+    test:
+        # Right after the test job is declared, we stipulate needs: build which means this test job will not run until the build job successfully executed.
+        needs: build
+        runs-on: ununtu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Set up Python
+              uses: actions/setup-python@v2
+              with:
+                python-version: 3.12
+
+            - name: Create virtual environment
+              run: |
+                python -m venv venv
+                source venv/bin/activate
+
+            - name: Install dependencies
+              run: |
+                python -m pip install --upgrade pip
+                python -m pip install -r requirements.txt
+
+            # Notice that the first four steps are the same, (Checkout code, Set up Python, Create virtual environment, Install dependencies), and there is only one additional step:
+            - name: Run tests
+              # run: The command python -m unittest discover -s tests -p 'test_*.py' is used to automatically discover and run all unit tests in Python located in the tests directory, looking for files matching the pattern of starting with 'test_' with anything after, ending in '.py'.
+              run: python -m unittest discover -s tests -p 'test_*.py'
