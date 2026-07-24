@@ -5,10 +5,10 @@ info:
   description: "API for managing a mechanic shop's customers, mechanics, service tickets, and inventory."
   version: "1.0.0"
 
-host: "127.0.0.1:5000"
+host: "mechanic-shop-api-deployment-and-cd-cd.onrender.com"
 basePath: "/"
 schemes:
-  - "http"
+  - "https"
 consumes:
   - "application/json"
 produces:
