@@ -5,6 +5,8 @@ import jose
 from functools import wraps
 from flask import current_app, has_app_context, request, jsonify
 
+# Note, or 'super secret secrets' , in the event that there is no environment variable 'SECRET_KEY' it will use super secret secrets as the key. This is necessary for our CI/CD pipeline, because there is no environment variable 'SECRET_KEY' set up in github, we need to have a backup to use.
+SECRET_KEY = os.environ.get('SECRET_KEY') or "super secret secrets"
 
 def get_secret_key():
     """Return the configured signing key, with a fallback used only by tests."""

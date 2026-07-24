@@ -1,4 +1,7 @@
 /project
+├── /.github
+│   └── /workflows
+│       └── main.yaml
 ├── /application
 │   ├── __init__.py - create_app() lives here
 │   ├── extensions.py
@@ -7,6 +10,15 @@
 │	│		├──__init__.py  - Initializt User Blueprint
 │	│		├── routes.py  - Create User Controllers/routes
 │   │		└── userSchemas.py
+│   ├── /static
+│   │   └── swagger.yaml
+│   ├── /utils
+│   │   └── util.py
+│   ├── /tests
+│   │   ├── test_customer.py
+│   │   ├── test_inventory.py
+│   │   ├── test_mechanic.py
+│   │   └── test_ticket.py
 │   └── models.py
 ├── app.py
 └── config.py

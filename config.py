@@ -1,9 +1,8 @@
-
 import os
 
 
 class DevelopmentConfig:
-    SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://root:<YOUR MYSQL PASSWORD>@localhost/<YOUR DATABASE>'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('MY_DATABASE_URI') # use: 'mysql+mysqlconnector://root:<YOUR MYSQL PASSWORD>@localhost/<YOUR DATABASE>'
     DEBUG = True
 
 DevelopementConfig = DevelopmentConfig
@@ -16,6 +15,7 @@ class TestingConfig:
     CACHE_TYPE = 'NullCache'
 
 class ProductionConfig:
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URI")
+    SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
     SECRET_KEY = os.environ.get("SECRET_KEY")
     DEBUG = False
+    CACHE_TYPE = "SimpleCache"
