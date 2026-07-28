@@ -1,18 +1,21 @@
 from datetime import datetime, timedelta, timezone
-import os
 from jose import jwt
 import jose
 from functools import wraps
 from flask import current_app, has_app_context, request, jsonify
 
-# Note, or 'super secret secrets' , in the event that there is no environment variable 'SECRET_KEY' it will use super secret secrets as the key. This is necessary for our CI/CD pipeline, because there is no environment variable 'SECRET_KEY' set up in github, we need to have a backup to use.
-SECRET_KEY = os.environ.get('SECRET_KEY') or "super secret secrets"
-
 def get_secret_key():
-    """Return the configured signing key, with a fallback used only by tests."""
-    if has_app_context() and current_app.config.get("SECRET_KEY"):
-        return current_app.config["SECRET_KEY"]
-    return os.environ.get("SECRET_KEY", "test-only-secret-key")
+    """Return the configured signing key, with a test-only context fallback."""
+    if has_app_context():
+        secret_key = current_app.config.get("SECRET_KEY")
+
+        if not secret_key:
+            raise RuntimeError("SECRET_KEY environment variable is required.")
+
+        return secret_key
+
+    # Existing tests create tokens just outside the Flask application context.
+    return "test-only-secret-key"
 
 def encode_token(customer_id): # using unique pieces of info to make our tokens user specific
     payload = {

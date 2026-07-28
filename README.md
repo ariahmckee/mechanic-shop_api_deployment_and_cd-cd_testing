@@ -1,6 +1,13 @@
 # Mechanic Shop API
 
-A production-ready Flask REST API for managing a mechanic shop's customers, mechanics, service tickets, and parts inventory. It includes JWT-based authorization, Swagger documentation, automated tests, a PostgreSQL production configuration, and a GitHub Actions CI/CD pipeline for deployment to Render.
+Backend course project demonstrating a Flask REST API for managing a mechanic shop's customers, mechanics, service tickets, and parts inventory. It includes JWT-based authorization, Swagger documentation, assignment-scoped automated tests, a PostgreSQL production configuration, and a GitHub Actions CI/CD pipeline for deployment to Render.
+
+## Live Deployment
+
+- [Live API base URL](https://mechanic-shop-api-deployment-and-cd-cd.onrender.com)
+- [Interactive Swagger documentation](https://mechanic-shop-api-deployment-and-cd-cd.onrender.com/api/docs/)
+
+The API does not define a landing route at `/`, so the base URL returns a 404 response by itself. Use the Swagger documentation to explore and interactively test the available endpoints.
 
 ## Features
 
@@ -27,6 +34,10 @@ A production-ready Flask REST API for managing a mechanic shop's customers, mech
 - python-jose
 - MySQL Connector/Python
 - MySQL
+- PostgreSQL with psycopg2-binary for production
+- Gunicorn
+- Render
+- GitHub Actions
 - unittest with SQLite for isolated route testing
 
 ## Project Structure
@@ -83,7 +94,14 @@ Create the MySQL database:
 CREATE DATABASE mechanic_db;
 ```
 
-Update the database URI in `config.py` to match your local MySQL username, password, host, and database.
+Set the development database URI and secret key as environment variables. Replace the example URI values with your local MySQL username, password, host, and database:
+
+```bash
+export MY_DATABASE_URI="mysql+mysqlconnector://username:password@localhost/mechanic_db"
+export SECRET_KEY="replace-with-a-long-random-value"
+```
+
+Development uses `MY_DATABASE_URI`, while the Render production configuration uses `SQLALCHEMY_DATABASE_URI`. Sensitive values should be stored in your local `.env` file or configured directly in Render and must not be committed to GitHub.
 
 Run the app locally with a development configuration:
 
@@ -97,7 +115,7 @@ The API runs at:
 http://127.0.0.1:5000
 ```
 
-For Render, set `DATABASE_URI` and `SECRET_KEY` as environment variables and use this start command:
+For Render, set `SQLALCHEMY_DATABASE_URI` and `SECRET_KEY` in the service's environment settings and use this start command:
 
 ```bash
 gunicorn flask_app:app

@@ -3,6 +3,7 @@ import os
 
 class DevelopmentConfig:
     SQLALCHEMY_DATABASE_URI = os.environ.get('MY_DATABASE_URI') # use: 'mysql+mysqlconnector://root:<YOUR MYSQL PASSWORD>@localhost/<YOUR DATABASE>'
+    SECRET_KEY = os.environ.get("SECRET_KEY", "development-only-secret-key")
     DEBUG = True
 
 DevelopementConfig = DevelopmentConfig
@@ -10,6 +11,7 @@ DevelopementConfig = DevelopmentConfig
 class TestingConfig:
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///testing.db'
+    SECRET_KEY = "test-only-secret-key"
     RATELIMIT_ENABLED = False
     DEBUG = True
     CACHE_TYPE = 'NullCache'
