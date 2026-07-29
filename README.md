@@ -328,4 +328,3 @@ Use `mechanic-shop.postman_collection.json` to test the API routes. For protecte
 - Mechanic and customer email and phone values must be unique.
 - `mechanic_ids` is returned in ticket responses and can be managed through `/tickets/<ticket_id>/edit`.
 - `inventory_items` is returned in ticket responses and can be managed through `/tickets/<ticket_id>/add-part/<inventory_id>`.
-
